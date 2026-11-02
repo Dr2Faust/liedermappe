@@ -4,7 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#173b57">
-<title>Liedermappe – Suche</title>
+<title>Liedermappe</title>
+<meta name="description" content="Gemeinsame Liedersuche in der Liedermappe.">
+<meta name="theme-color" content="#173b57">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+
 <style>
 :root{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#17232d;background:#f3f6f8}
 *{box-sizing:border-box}body{margin:0}
@@ -163,4 +169,14 @@ input.addEventListener("input",scheduleSearch);
 codeInput.addEventListener("keydown",e=>{if(e.key==="Enter")loginButton.click();});
 document.getElementById("mic").addEventListener("click",()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){status.textContent="Spracheingabe wird in diesem Browser nicht unterstützt. Bitte Suchtext eingeben.";return;}const r=new SR();r.lang=speechLanguage;r.interimResults=false;r.onstart=()=>status.textContent="Ich höre zu …";r.onresult=e=>{input.value=e.results[0][0].transcript;input.dispatchEvent(new Event("input",{bubbles:true}));};r.onerror=e=>{status.textContent="Spracheingabe nicht möglich ("+e.error+"). Bitte Mikrofonfreigabe prüfen oder den Titel eintippen.";};r.onend=()=>{if(status.textContent==="Ich höre zu …")status.textContent="Keine Sprache erkannt. Bitte erneut versuchen.";};try{r.start();}catch(e){status.textContent="Spracheingabe konnte nicht gestartet werden. Bitte erneut versuchen.";}});render();
 </script>
-</body></html>
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(err => {
+      console.warn("App-Offlinefunktionen konnten nicht aktiviert werden:", err);
+    });
+  });
+}
+</script>
+\n</body></html>
