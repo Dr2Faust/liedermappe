@@ -31,11 +31,15 @@ footer{font-size:12px;color:#778792;text-align:center;margin:24px 0}
 <header><h1>Liedermappe</h1><p>Titelsuche – tippen oder Spracheingabe verwenden</p></header>
 <main>
 <div class="searchbox" style="position:static;gap:8px">
-<input id="guestCode" type="password" placeholder="Gäste-Zugangscode" autocomplete="current-password" aria-label="Gäste-Zugangscode">
+<div style="display:flex;gap:6px;align-items:center;flex:1;min-width:0">
+<input id="guestCode" type="password" placeholder="Gäste-Zugangscode" autocomplete="current-password" aria-label="Gäste-Zugangscode" style="flex:1;min-width:0">
+<button id="toggleCode" type="button" aria-label="Zugangscode anzeigen" title="Zugangscode anzeigen" style="font-size:15px;min-width:44px;padding:8px">👁</button>
+</div>
 <button id="login" type="button" style="font-size:15px;min-width:auto">Anmelden</button>
 </div>
 <div class="searchbox">
 <input id="q" type="search" placeholder="Songtitel suchen …" autocomplete="off" aria-label="Songtitel suchen">
+<button id="speechLangToggle" type="button" aria-label="Sprache wechseln" title="Spracheingabe: Englisch (zum Wechseln antippen)" style="font-size:12px;min-width:36px;padding:7px 5px;border:1px solid #cbd5e1;border-radius:9px;background:white">EN</button>
 <button id="mic" aria-label="Spracheingabe starten" title="Spracheingabe">🎤</button>
 </div>
 <p id="status" aria-live="polite"></p>
@@ -77,6 +81,22 @@ const PUBLISHABLE_KEY="sb_publishable_fel6O7eEu9vH6OeQzJcvRA_dCcaOrB5";
 const API_URL=PROJECT_URL+"/functions/v1/liedermappe-api";
 const input=document.getElementById("q"), results=document.getElementById("results"),status=document.getElementById("status");
 const codeInput=document.getElementById("guestCode"), loginButton=document.getElementById("login");
+let speechLanguage="en-US";
+const speechLangToggle=document.getElementById("speechLangToggle");
+speechLangToggle.addEventListener("click",()=>{
+  speechLanguage=speechLanguage==="en-US"?"de-DE":"en-US";
+  speechLangToggle.textContent=speechLanguage==="en-US"?"EN":"DE";
+  speechLangToggle.title="Spracheingabe: "+(speechLanguage==="en-US"?"Englisch":"Deutsch")+" (zum Wechseln antippen)";
+  speechLangToggle.setAttribute("aria-label",speechLangToggle.title);
+});
+const toggleCodeButton=document.getElementById("toggleCode");
+toggleCodeButton.addEventListener("click",()=>{
+  const show=codeInput.type==="password";
+  codeInput.type=show?"text":"password";
+  toggleCodeButton.textContent=show?"🙈":"👁";
+  toggleCodeButton.setAttribute("aria-label",show?"Zugangscode verbergen":"Zugangscode anzeigen");
+  toggleCodeButton.title=show?"Zugangscode verbergen":"Zugangscode anzeigen";
+});
 input.disabled=true;
 let guestCode="", searchTimer=null, requestNumber=0, loggedIn=false;
 
@@ -141,6 +161,6 @@ loginButton.addEventListener("click",async()=>{
 });
 input.addEventListener("input",scheduleSearch);
 codeInput.addEventListener("keydown",e=>{if(e.key==="Enter")loginButton.click();});
-document.getElementById("mic").addEventListener("click",()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){status.textContent="Spracheingabe wird in diesem Browser nicht unterstützt. Bitte Suchtext eingeben.";return;}const r=new SR();r.lang="de-DE";r.interimResults=false;r.onstart=()=>status.textContent="Ich höre zu …";r.onresult=e=>{input.value=e.results[0][0].transcript;input.dispatchEvent(new Event("input",{bubbles:true}));};r.onerror=e=>{status.textContent="Spracheingabe nicht möglich ("+e.error+"). Bitte Mikrofonfreigabe prüfen oder den Titel eintippen.";};r.onend=()=>{if(status.textContent==="Ich höre zu …")status.textContent="Keine Sprache erkannt. Bitte erneut versuchen.";};try{r.start();}catch(e){status.textContent="Spracheingabe konnte nicht gestartet werden. Bitte erneut versuchen.";}});render();
+document.getElementById("mic").addEventListener("click",()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){status.textContent="Spracheingabe wird in diesem Browser nicht unterstützt. Bitte Suchtext eingeben.";return;}const r=new SR();r.lang=speechLanguage;r.interimResults=false;r.onstart=()=>status.textContent="Ich höre zu …";r.onresult=e=>{input.value=e.results[0][0].transcript;input.dispatchEvent(new Event("input",{bubbles:true}));};r.onerror=e=>{status.textContent="Spracheingabe nicht möglich ("+e.error+"). Bitte Mikrofonfreigabe prüfen oder den Titel eintippen.";};r.onend=()=>{if(status.textContent==="Ich höre zu …")status.textContent="Keine Sprache erkannt. Bitte erneut versuchen.";};try{r.start();}catch(e){status.textContent="Spracheingabe konnte nicht gestartet werden. Bitte erneut versuchen.";}});render();
 </script>
 </body></html>
